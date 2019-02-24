@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>连线动画</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
+</head>
+<body style="text-align:center;">
+    <div style="margin-top:100px;">
+        <ul style="list-style:none;display:flex;padding:0;justify-content:center;">
+            <li style="padding-right:30px;"><span>X坐标（0-600）</span><input id="xindex" type="number" max="600" min="0" style="width:80px;height:20px;"></li>
+            <li style="padding-right:30px;"><span>Y坐标（0-500）</span><input id="yindex" type="number" max="500" min="0" style="width:80px;height:20px;"></li>
+            <li><input id="addBtn" type="button" value="添加" style="width:80px;height:26px;padding:0;"></li>
+        </ul>
+        <textarea id="coordinate" style="width:400px;height:200px;margin-top:20px;margin-left:-130px;" disabled></textarea>
+    </div>
+    <div style="margin-top:20px;padding:10px;">
+        <span id="playBtn"><i class="fa fa-play" style="font-size:24px;padding:10px;"></i></span>
+        <span id="stopBtn" hidden><i class="fa fa-pause" style="font-size:24px;padding:10px;"></i></span>
+        <span id="replayBtn"><i class="fa fa-repeat" style="font-size:24px;padding:10px;"></i></span>
+    </div>
+    <canvas id="myCanvas" width="600" height="500" style="border:1px solid #d3d3d3;">您的浏览器不支持 HTML5 canvas 标签。</canvas>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <script>
+        //点坐标数组
+        var indexArray = [{x:0,y:0},{x:10,y:20},{x:30,y:100},{x:400,y:450}];
+        var index = 0;
+        $("#addBtn").click(function(){
+            if ($("#xindex").val() && $("#yindex").val()) {
+                indexArray.push({ x: $("#xindex").val(), y: $("#yindex").val() });
+                if ($("#coordinate").val()) {
+                    $("#coordinate").val($("#coordinate").val()+"\n("+$("#xindex").val()+","+$("#yindex").val()+")");
+                } else {
+                    $("#coordinate").val("("+$("#xindex").val()+","+$("#yindex").val()+")");
+                }
+            } else {
+                alert("请输入数字！");
+            }
+        });
+
+        $("#playBtn").click(function(){
+            if (indexArray.length > 0) {
+                $(this).hide();
+                $("#stopBtn").show();
+                ligature();
+            } else {
+                alert("请输入数字！");
+            }
+        });
+
+        $("#stopBtn").click(function(){
+            $(this).hide();
+            $("#playBtn").show();
+        });
+
+        $("#replayBtn").click(function(){
+            if (indexArray.length > 0) {
+                ligature("replay");
+            } else {
+                alert("请输入数字！");
+            }
+        });
+
+        function ligature() {
+            
+            for (var i = 0; i < indexArray.length-1; i++) {
+                var startPoint = indexArray[i];
+                var endPoint = indexArray[i+1];
+                drawDynamicLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+            }
+        }
+
+
+        /*
+            画动态直线
+            @(x1,y1)    起点
+            @(x2,y2)    终点
+        */
+        function drawDynamicLine(x1, y1, x2, y2) {
+            
+            var c = document.getElementById("myCanvas");
+            var ctx = c.getContext("2d");
+            if(x1 == x2) {
+                drawVerticalLine(x1, y1, x2, y2);   /*斜率不存在的情况*/
+            } else {
+                drawCommonLine(x1, y1, x2, y2);    /*斜率为正或者负或者0*/
+            }
+        
+            /*k存在的情况*/
+            function drawCommonLine(x1, y1, x2, y2) {
+                var k = (y2-y1)/(x2-x1)   //斜率k
+                var b = y1-k*x1           //常数b
+                var i = 0;
+                var flag = compare(x1, x2);
+        
+                function draw(){
+                    var xi = x1+i;
+                    var yi = k*xi+b;
+                    var xj = x1+i+1;
+                    var yj = k*xj+b;
+                    if (Math.abs(i)<=Math.abs(x1-x2)) {
+                        drawLine(xi,yi,xj,yj);
+                    } else {
+                        drawLine(xi,yi,x2,y2);
+                    }
+                    
+                    i += 1*flag;               
+                    if(Math.abs(i)<=Math.abs(x1-x2)) {
+                        window.setTimeout(function(){
+                            draw();
+                        },50);
+                    }
+                }
+                draw();
+            }
+        
+            /*k不存在，也就是垂直的情况*/
+            function drawVerticalLine(x1, y1, x2, y2){
+                var i = 0;
+                var flag = compare(y1, y2);
+                function draw(){
+                    var yi = y1+i;
+                    var yj = y1+i+1*flag;
+                    if (Math.abs(i)<=Math.abs(y1-y2)) {
+                        drawLine(x1,yi,x2,yj);
+                    } else {
+                        drawLine(x1,yi,x2,y2);
+                    }
+                    
+                    i += 1*flag;
+                    if (Math.abs(i) <= Math.abs(y1-y2)) {
+                        window.setTimeout(function(){
+                            draw();
+                        },50);
+                    }
+                }
+                draw();
+            }
+            
+            /*比较函数*/
+            function compare(a, b){
+                if(a < b){
+                    return 1;
+                } else {
+                    return -1;
+                }
+            }
+        
+            /*线条片段*/
+            function drawLine(x1, y1, x2, y2) {
+                ctx.beginPath();
+                ctx.moveTo(x1,y1);
+                ctx.lineTo(x2,y2);
+                ctx.stroke();
+                ctx.closePath();
+            }
+        }
+    </script>
+</body>
+</html>
