@@ -1,0 +1,41 @@
+body {
+    text-align: center;
+}
+.header {
+    margin-top: 100px;
+}
+.content {
+    margin-top: 20px;
+    padding: 10px;
+}
+.header ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    justify-content: center;
+}
+.header ul li {
+    padding-right: 30px;
+}
+.header ul li input[type=number]{
+    width: 80px;
+    height: 20px;
+}
+.header ul li input[type=button]{
+    width: 80px;
+    height: 26px;
+    padding: 0;
+}
+#coordinate {
+    width: 400px;
+    height: 200px;
+    margin-top: 20px;
+    margin-left: -130px;
+}
+.content span i {
+    font-size: 24px;
+    padding: 10px;
+}
+#myCanvas {
+    border: 1px solid #d3d3d3;
+}
